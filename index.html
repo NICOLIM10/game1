@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Tixl · Tickets Essential - Sign In</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-gradient-start: #1a1a2e;
+            --bg-gradient-mid: #16213e;
+            --bg-gradient-end: #0f0f1a;
+            --bg-card: rgba(26,26,46,0.9);
+            --bg-card-solid: #1a1a2e;
+            --text-primary: #F0F0F5;
+            --text-secondary: #A0A0B5;
+            --border-color: #2A2A3A;
+            --accent-purple: #9B59B6;
+            --accent-purple-light: #BE7BDE;
+            --accent-purple-dark: #7D3C98;
+            --accent-lavender: #D4B8D9;
+            --input-bg: rgba(0,0,0,0.4);
+            --shadow-color: rgba(0,0,0,0.3);
+            --admin-accent: #2D5A3D;
+            --admin-accent-light: #3a7a52;
+            --weak-red: #e06c6c;
+            --medium-yellow: #e0c46c;
+            --strong-green: #6cae6c;
+            --transition-default: all 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+        }
+
+        body.light-mode {
+            --bg-gradient-start: #f5f0e8;
+            --bg-gradient-mid: #faf5ed;
+            --bg-gradient-end: #f0ebe3;
+            --bg-card: rgba(255,255,255,0.95);
+            --bg-card-solid: #ffffff;
+            --text-primary: #2C2A28;
+            --text-secondary: #6B6762;
+            --border-color: #E8E4DD;
+            --accent-purple: #8B5E3C;
+            --accent-purple-light: #B88A5A;
+            --accent-purple-dark: #6B4528;
+            --accent-lavender: #D4B896;
+            --input-bg: rgba(0,0,0,0.03);
+            --shadow-color: rgba(0,0,0,0.08);
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-mid) 50%, var(--bg-gradient-end) 100%);
+            font-family: 'Inter', sans-serif;
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: clamp(1rem, 5vw, 2.5rem);
+            transition: background 0.3s ease, color 0.3s ease;
+            position: relative;
+        }
+
+        .particle {
+            position: fixed;
+            width: 4px;
+            height: 4px;
+            background: var(--accent-purple);
+            border-radius: 50%;
+            opacity: 0.4;
+            pointer-events: none;
+            animation: float 20s infinite linear;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.5; }
+            90% { opacity: 0.5; }
+            100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+        }
+
+        .container {
+            max-width: 580px;
+            width: 100%;
+            margin: 0 auto;
+            position: relative;
+            z-index: 10;
+            animation: fadeInUp 0.7s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .brand {
+            text-align: center;
+            margin-bottom: clamp(1.5rem, 5vw, 2rem);
+        }
+
+        .brand h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.2rem, 10vw, 3.2rem);
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            background: linear-gradient(135deg, var(--text-primary), var(--accent-lavender));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .brand p {
+            color: var(--text-secondary);
+            font-size: clamp(0.7rem, 3vw, 0.85rem);
+            margin-top: 0.6rem;
+            letter-spacing: 0.5px;
+        }
+
+        .card {
+            background: var(--bg-card);
+            backdrop-filter: blur(14px);
+            border-radius: clamp(1.5rem, 6vw, 2rem);
+            padding: clamp(1.2rem, 5vw, 2rem) clamp(1rem, 5vw, 2rem) clamp(1.5rem, 6vw, 2.2rem);
+            box-shadow: 0 20px 40px var(--shadow-color);
+            border: 1px solid var(--border-color);
+            transition: var(--transition-default);
+        }
+
+        .role-selector {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1.8rem;
+            background: var(--input-bg);
+            padding: 0.35rem;
+            border-radius: 60px;
+            border: 1px solid var(--border-color);
+        }
+
+        .role-btn {
+            flex: 1;
+            padding: 0.7rem 0.5rem;
+            background: transparent;
+            border: none;
+            font-family: 'Inter', sans-serif;
+            font-size: clamp(0.7rem, 3.5vw, 0.8rem);
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 40px;
+            transition: var(--transition-default);
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+
+        @media (max-width: 480px) {
+            .role-btn {
+                white-space: normal;
+                word-break: break-word;
+                padding: 0.6rem 0.3rem;
+                font-size: 0.7rem;
+            }
+            .role-selector {
+                gap: 0.5rem;
+            }
+        }
+
+        .role-btn.active {
+            background: var(--accent-purple);
+            color: white;
+            box-shadow: 0 4px 12px rgba(155, 89, 182, 0.25);
+        }
+
+        .role-btn.admin-role.active {
+            background: var(--admin-accent);
+            box-shadow: 0 4px 12px rgba(45, 90, 61, 0.3);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1.8rem;
+            background: var(--input-bg);
+            padding: 0.35rem;
+            border-radius: 60px;
+            border: 1px solid var(--border-color);
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 0.7rem 0.5rem;
+            background: transparent;
+            border: none;
+            font-family: 'Inter', sans-serif;
+            font-size: clamp(0.75rem, 3.5vw, 0.85rem);
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 40px;
+            transition: var(--transition-default);
+            color: var(--text-secondary);
+        }
+
+        .tab-btn.active {
+            background: var(--accent-purple);
+            color: white;
+            box-shadow: 0 4px 12px rgba(155, 89, 182, 0.25);
+        }
+
+        .form {
+            display: none;
+            animation: fadeIn 0.35s ease;
+        }
+
+        .form.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(8px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .input-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: var(--accent-purple);
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .password-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .password-wrapper input {
+            flex: 1;
+            padding-right: 3rem;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 1rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+            font-size: 1rem;
+            user-select: none;
+            transition: 0.2s;
+        }
+
+        .toggle-password:hover {
+            color: var(--accent-purple);
+        }
+
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 0.85rem 1rem;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            color: var(--text-primary);
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: var(--accent-purple);
+            box-shadow: 0 0 0 3px rgba(155, 89, 182, 0.2);
+        }
+
+        .row {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .row .input-group {
+            flex: 1;
+            min-width: 130px;
+        }
+
+        @media (max-width: 550px) {
+            .row {
+                flex-direction: column;
+                gap: 0;
+            }
+            .row .input-group {
+                width: 100%;
+            }
+        }
+
+        .strength-container {
+            margin-top: 0.5rem;
+        }
+
+        .strength-bar {
+            height: 4px;
+            border-radius: 4px;
+            background: var(--border-color);
+            overflow: hidden;
+        }
+
+        .strength-fill {
+            height: 100%;
+            width: 0%;
+            transition: width 0.2s, background 0.2s;
+            border-radius: 4px;
+        }
+
+        .strength-fill.weak { background: var(--weak-red); width: 33%; }
+        .strength-fill.medium { background: var(--medium-yellow); width: 66%; }
+        .strength-fill.strong { background: var(--strong-green); width: 100%; }
+
+        .strength-text {
+            font-size: 0.7rem;
+            margin-top: 0.35rem;
+            color: var(--text-secondary);
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 0.9rem;
+            background: var(--accent-purple);
+            color: white;
+            border: none;
+            border-radius: 2.5rem;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 0.75rem;
+        }
+
+        .btn-primary:hover {
+            transform: scale(0.98);
+            filter: brightness(1.05);
+        }
+
+        .btn-admin {
+            background: var(--admin-accent);
+        }
+
+        .forgot-password {
+            text-align: right;
+            margin-top: 0.3rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .forgot-password a {
+            color: var(--accent-purple-light);
+            font-size: 0.7rem;
+            text-decoration: none;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .message {
+            text-align: center;
+            font-size: 0.75rem;
+            margin-top: 1.2rem;
+            padding: 0.6rem;
+            border-radius: 2rem;
+            font-weight: 500;
+        }
+
+        .message.error {
+            background: rgba(196, 65, 65, 0.2);
+            color: #e06c6c;
+            border: 1px solid #e06c6c;
+        }
+
+        .message.success {
+            background: rgba(155, 89, 182, 0.2);
+            color: var(--accent-purple-light);
+            border: 1px solid var(--accent-purple);
+        }
+
+        .info-note {
+            margin-top: 1.5rem;
+            padding: 0.8rem;
+            background: var(--input-bg);
+            border-radius: 1.2rem;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+
+        .decor-line {
+            margin-top: 1.5rem;
+            text-align: center;
+            font-size: 0.65rem;
+            color: var(--text-secondary);
+            border-top: 1px solid var(--border-color);
+            padding-top: 1.2rem;
+        }
+
+        .theme-toggle-fixed {
+            position: fixed;
+            top: clamp(0.8rem, 4vw, 1.5rem);
+            right: clamp(0.8rem, 4vw, 1.5rem);
+            background: var(--bg-card-solid);
+            border: 1px solid var(--border-color);
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            cursor: pointer;
+            font-size: clamp(0.7rem, 3vw, 0.8rem);
+            font-weight: 500;
+            color: var(--text-primary);
+            transition: 0.2s;
+            z-index: 100;
+            font-family: 'Inter', sans-serif;
+            backdrop-filter: blur(4px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .theme-toggle-fixed:hover {
+            background: var(--accent-purple);
+            color: white;
+        }
+
+        @media (max-width: 480px) {
+            .card {
+                padding: 1.2rem 1rem 1.6rem;
+            }
+            .input-group input, .input-group select {
+                padding: 0.7rem 0.9rem;
+                font-size: 0.85rem;
+            }
+            .btn-primary {
+                padding: 0.75rem;
+                font-size: 0.85rem;
+            }
+            .tab-btn, .role-btn {
+                font-size: 0.7rem;
+                padding: 0.5rem 0.3rem;
+            }
+            .info-note {
+                font-size: 0.65rem;
+            }
+        }
+
+        button, .tab-btn, .role-btn, .toggle-password, .theme-toggle-fixed, .forgot-password a {
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+    </style>
+</head>
+<body>
+    <button class="theme-toggle-fixed" id="themeToggle" aria-label="Switch light/dark mode">🌓 Light/Dark</button>
+    <div id="particles"></div>
+    <div class="container">
+        <div class="brand">
+            <h1>Tixl · Tickets Essential<span style="color: var(--accent-purple);">.</span></h1>
+            <p>secure your seat · claim your moment</p>
+        </div>
+        <div class="card">
+            <div class="role-selector">
+                <button class="role-btn active" data-role="user" onclick="selectRole('user')">🎟️ Student / Staff / Teacher</button>
+                <button class="role-btn admin-role" data-role="admin" onclick="selectRole('admin')">⚙️ Administrator</button>
+            </div>
+
+            <div class="tabs" id="tabContainer">
+                <button class="tab-btn active" data-tab="login">⟶ login</button>
+                <button class="tab-btn" data-tab="register" id="registerTabBtn">✧ register</button>
+            </div>
+
+            <!-- Login Form -->
+            <div id="loginForm" class="form active">
+                <div class="input-group">
+                    <label>email address</label>
+                    <input type="email" id="loginEmail" placeholder="email@example.com" autocomplete="email">
+                </div>
+                <div class="input-group">
+                    <label>password</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password">
+                        <span class="toggle-password" onclick="togglePasswordVisibility('loginPassword', this)">👁️</span>
+                    </div>
+                </div>
+                <div class="forgot-password">
+                    <a onclick="goToForgotPassword()">forgot password?</a>
+                </div>
+                <button class="btn-primary" id="loginBtn" onclick="handleLogin()">→ enter</button>
+                <div id="loginMessage" class="message"></div>
+            </div>
+
+            <!-- Register Form - Regular Users -->
+            <div id="registerForm" class="form">
+                <div class="input-group">
+                    <label>full name</label>
+                    <input type="text" id="regName" placeholder="e.g. Sofia Ramirez">
+                </div>
+                <div class="row">
+                    <div class="input-group">
+                        <label>grade / position</label>
+                        <select id="regGrade">
+                            <option value="">select</option>
+                            <option value="Grade 11 - Student">Grade 11 - Student</option>
+                            <option value="Grade 12 - Student">Grade 12 - Student</option>
+                            <option value="College - Student">College - Student</option>
+                            <option value="Teacher - Faculty">Teacher - Faculty</option>
+                            <option value="Staff - Employee">Staff - Employee</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>section / department</label>
+                        <input type="text" id="regSection" placeholder="e.g. STEM, ABM, English Dept">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>email address</label>
+                    <input type="email" id="regEmail" placeholder="student@campus.edu" autocomplete="email">
+                </div>
+                <div class="input-group">
+                    <label>password (min. 6 characters)</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="regPassword" placeholder="create a password" oninput="checkPasswordStrength('regPassword', 'regStrength')" autocomplete="new-password">
+                        <span class="toggle-password" onclick="togglePasswordVisibility('regPassword', this)">👁️</span>
+                    </div>
+                    <div class="strength-container" id="regStrength">
+                        <div class="strength-bar"><div class="strength-fill"></div></div>
+                        <div class="strength-text"></div>
+                    </div>
+                </div>
+                <button class="btn-primary" onclick="handleRegister()">✧ create account →</button>
+                <div id="registerMessage" class="message"></div>
+            </div>
+            
+            <!-- Admin Register Form -->
+            <div id="adminRegisterForm" class="form">
+                <div class="input-group">
+                    <label>full name</label>
+                    <input type="text" id="adminRegName" placeholder="e.g. John Smith">
+                </div>
+                <div class="input-group">
+                    <label>admin email</label>
+                    <input type="email" id="adminRegEmail" placeholder="admin@organization.edu" autocomplete="email">
+                </div>
+                <div class="input-group">
+                    <label>admin key (required)</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="adminRegKey" placeholder="Enter admin registration key" autocomplete="off">
+                        <span class="toggle-password" onclick="togglePasswordVisibility('adminRegKey', this)">👁️</span>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>password (min. 6 characters)</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="adminRegPassword" placeholder="create a strong password" oninput="checkPasswordStrength('adminRegPassword', 'adminStrength')" autocomplete="new-password">
+                        <span class="toggle-password" onclick="togglePasswordVisibility('adminRegPassword', this)">👁️</span>
+                    </div>
+                    <div class="strength-container" id="adminStrength">
+                        <div class="strength-bar"><div class="strength-fill"></div></div>
+                        <div class="strength-text"></div>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>confirm password</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="adminRegConfirmPassword" placeholder="confirm password" autocomplete="off">
+                        <span class="toggle-password" onclick="togglePasswordVisibility('adminRegConfirmPassword', this)">👁️</span>
+                    </div>
+                </div>
+                <button class="btn-primary btn-admin" onclick="handleAdminRegister()">⚙️ create admin account →</button>
+                <div id="adminRegisterMessage" class="message"></div>
+            </div>
+            
+            <div class="info-note" id="roleInfo">
+                🎟️ Students, Teachers & Staff: Buy tickets and view your QR passes.
+            </div>
+            <div class="decor-line">
+                🎟️ each ticket holds a unique QR • non-transferable
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // STORAGE KEYS (must match all pages)
+        const STORAGE_USERS = 'tixl_users';
+        const STORAGE_ADMINS = 'tixl_admins';
+        const STORAGE_USER_SESSION = 'tixl_user_session';
+        const STORAGE_ADMIN_SESSION = 'tixl_admin_session';
+        const ADMIN_REGISTRATION_KEY = 'TixlAdmin2025!';
+        let selectedRole = 'user';
+
+        // ---------- helpers ----------
+        function loadUsers() { return JSON.parse(localStorage.getItem(STORAGE_USERS) || '[]'); }
+        function saveUsers(users) { localStorage.setItem(STORAGE_USERS, JSON.stringify(users)); }
+        function loadAdmins() { return JSON.parse(localStorage.getItem(STORAGE_ADMINS) || '[]'); }
+        function saveAdmins(admins) { localStorage.setItem(STORAGE_ADMINS, JSON.stringify(admins)); }
+
+        function setUserSession(user) {
+            localStorage.removeItem(STORAGE_ADMIN_SESSION);
+            localStorage.setItem(STORAGE_USER_SESSION, JSON.stringify({
+                id: user.id, email: user.email, name: user.name, grade: user.grade, section: user.section, bio: user.bio || '', role: 'user', expires: Date.now() + (8 * 60 * 60 * 1000)
+            }));
+        }
+
+        function setAdminSession(admin) {
+            localStorage.removeItem(STORAGE_USER_SESSION);
+            localStorage.setItem(STORAGE_ADMIN_SESSION, JSON.stringify({
+                id: admin.id, email: admin.email, name: admin.name, role: 'admin', expires: Date.now() + (8 * 60 * 60 * 1000)
+            }));
+        }
+
+        // Initialize empty data (no demo accounts)
+        function initializeDefaultData() {
+            // Don't create any demo accounts - start with empty storage
+            // This ensures no pre-existing accounts
+            let users = loadUsers();
+            let admins = loadAdmins();
+            
+            // Optional: Uncomment if you want to keep existing data but not create new demos
+            // console.log('Users:', users.length, 'Admins:', admins.length);
+        }
+
+        // UI / interactions
+        function selectRole(role) {
+            selectedRole = role;
+            const userBtn = document.querySelector('.role-btn[data-role="user"]');
+            const adminBtn = document.querySelector('.role-btn[data-role="admin"]');
+            const registerTabBtn = document.getElementById('registerTabBtn');
+            const roleInfoDiv = document.getElementById('roleInfo');
+            const loginBtnElem = document.getElementById('loginBtn');
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            const adminRegisterForm = document.getElementById('adminRegisterForm');
+            const loginTab = document.querySelector('.tab-btn[data-tab="login"]');
+            const regTab = document.querySelector('.tab-btn[data-tab="register"]');
+            
+            if (role === 'user') {
+                userBtn.classList.add('active');
+                adminBtn.classList.remove('active');
+                if (registerTabBtn) registerTabBtn.style.display = 'block';
+                if (roleInfoDiv) { 
+                    roleInfoDiv.style.display = 'block'; 
+                    roleInfoDiv.innerHTML = '🎟️ Students, Teachers & Staff: Buy tickets and view your QR passes.'; 
+                }
+                if (loginBtnElem) loginBtnElem.classList.remove('btn-admin');
+                
+                loginForm.classList.add('active');
+                registerForm.classList.remove('active');
+                adminRegisterForm.classList.remove('active');
+                
+                if (loginTab) loginTab.classList.add('active');
+                if (regTab) regTab.classList.remove('active');
+                
+                localStorage.removeItem(STORAGE_ADMIN_SESSION);
+            } else {
+                adminBtn.classList.add('active');
+                userBtn.classList.remove('active');
+                if (registerTabBtn) registerTabBtn.style.display = 'block';
+                if (roleInfoDiv) roleInfoDiv.style.display = 'none';
+                if (loginBtnElem) loginBtnElem.classList.add('btn-admin');
+                
+                loginForm.classList.add('active');
+                registerForm.classList.remove('active');
+                adminRegisterForm.classList.remove('active');
+                
+                if (loginTab) loginTab.classList.add('active');
+                if (regTab) regTab.classList.remove('active');
+                
+                localStorage.removeItem(STORAGE_USER_SESSION);
+            }
+            clearMessages();
+        }
+
+        function clearMessages() {
+            ['loginMessage', 'registerMessage', 'adminRegisterMessage'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = '';
+            });
+        }
+
+        function togglePasswordVisibility(inputId, element) {
+            const input = document.getElementById(inputId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                element.textContent = '🙈';
+            } else {
+                input.type = 'password';
+                element.textContent = '👁️';
+            }
+        }
+
+        function checkPasswordStrength(inputId, containerId) {
+            const password = document.getElementById(inputId).value;
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            const fill = container.querySelector('.strength-fill');
+            const textSpan = container.querySelector('.strength-text');
+            if (!fill || !textSpan) return;
+            if (!password) {
+                fill.style.width = '0%';
+                fill.className = 'strength-fill';
+                textSpan.textContent = '';
+                return;
+            }
+            let strength = 0;
+            if (password.length >= 6) strength++;
+            if (password.length >= 10) strength++;
+            if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+            if (/[0-9]/.test(password)) strength++;
+            if (/[^a-zA-Z0-9]/.test(password)) strength++;
+            
+            if (strength <= 2 || password.length < 6) {
+                fill.className = 'strength-fill weak';
+                textSpan.textContent = '🔴 Weak password';
+                textSpan.className = 'strength-text weak';
+            } else if (strength <= 4) {
+                fill.className = 'strength-fill medium';
+                textSpan.textContent = '🟡 Medium password';
+                textSpan.className = 'strength-text medium';
+            } else {
+                fill.className = 'strength-fill strong';
+                textSpan.textContent = '🟢 Strong password';
+                textSpan.className = 'strength-text strong';
+            }
+        }
+
+        // Auth handlers
+        function handleLogin() {
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            const msgDiv = document.getElementById('loginMessage');
+            
+            if (!email || !password) {
+                msgDiv.textContent = '❌ please fill in all fields';
+                msgDiv.className = 'message error';
+                return;
+            }
+            
+            if (selectedRole === 'admin') {
+                const admins = loadAdmins();
+                const admin = admins.find(a => a.email === email && a.password === password);
+                
+                if (admin) {
+                    setAdminSession(admin);
+                    msgDiv.textContent = '✓ Admin login successful! redirecting...';
+                    msgDiv.className = 'message success';
+                    setTimeout(() => { 
+                        window.location.href = 'manager.html'; 
+                    }, 800);
+                } else {
+                    msgDiv.textContent = '❌ Invalid admin credentials. Please register first.';
+                    msgDiv.className = 'message error';
+                }
+            } else {
+                const users = loadUsers();
+                const user = users.find(u => u.email === email && u.password === password);
+                
+                if (user) {
+                    setUserSession(user);
+                    msgDiv.textContent = '✓ login successful! redirecting...';
+                    msgDiv.className = 'message success';
+                    setTimeout(() => { 
+                        window.location.href = 'ticket.html'; 
+                    }, 800);
+                } else {
+                    msgDiv.textContent = '❌ invalid email or password. Please register first.';
+                    msgDiv.className = 'message error';
+                }
+            }
+        }
+
+        function handleRegister() {
+            const name = document.getElementById('regName').value.trim();
+            const grade = document.getElementById('regGrade').value;
+            const section = document.getElementById('regSection').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const password = document.getElementById('regPassword').value;
+            const msgDiv = document.getElementById('registerMessage');
+            
+            if (!name || !email || !password || !grade || !section) {
+                msgDiv.textContent = '❌ please complete all fields';
+                msgDiv.className = 'message error';
+                return;
+            }
+            if (password.length < 6) {
+                msgDiv.textContent = '❌ password must be at least 6 characters';
+                msgDiv.className = 'message error';
+                return;
+            }
+            if (!email.includes('@')) {
+                msgDiv.textContent = '❌ enter a valid email address';
+                msgDiv.className = 'message error';
+                return;
+            }
+            
+            const users = loadUsers();
+            if (users.find(u => u.email === email)) {
+                msgDiv.textContent = '❌ email already registered.';
+                msgDiv.className = 'message error';
+                return;
+            }
+            
+            const newUser = {
+                id: 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 8),
+                name, grade, section, email, password, bio: '', role: 'user', createdAt: new Date().toISOString()
+            };
+            users.push(newUser);
+            saveUsers(users);
+            setUserSession(newUser);
+            msgDiv.textContent = '✓ account created! redirecting...';
+            msgDiv.className = 'message success';
+            setTimeout(() => { window.location.href = 'ticket.html'; }, 800);
+        }
+
+        function handleAdminRegister() {
+            const name = document.getElementById('adminRegName').value.trim();
+            const email = document.getElementById('adminRegEmail').value.trim();
+            const adminKey = document.getElementById('adminRegKey').value;
+            const password = document.getElementById('adminRegPassword').value;
+            const confirm = document.getElementById('adminRegConfirmPassword').value;
+            const msgDiv = document.getElementById('adminRegisterMessage');
+            
+            if (!name || !email || !adminKey || !password || !confirm) {
+                msgDiv.textContent = '❌ please complete all fields';
+                msgDiv.className = 'message error';
+                return;
+            }
+            if (adminKey !== ADMIN_REGISTRATION_KEY) {
+                msgDiv.textContent = '❌ Invalid admin registration key. Please contact support.';
+                msgDiv.className = 'message error';
+                return;
+            }
+            if (password.length < 6) {
+                msgDiv.textContent = '❌ password must be at least 6 characters';
+                msgDiv.className = 'message error';
+                return;
+            }
+            if (password !== confirm) {
+                msgDiv.textContent = '❌ passwords do not match';
+                msgDiv.className = 'message error';
+                return;
+            }
+            if (!email.includes('@')) {
+                msgDiv.textContent = '❌ enter a valid email address';
+                msgDiv.className = 'message error';
+                return;
+            }
+            
+            const admins = loadAdmins();
+            if (admins.find(a => a.email === email)) {
+                msgDiv.textContent = '❌ admin email already registered';
+                msgDiv.className = 'message error';
+                return;
+            }
+            
+            const newAdmin = { 
+                id: 'admin_' + Date.now() + '_' + Math.random().toString(36).substr(2, 8), 
+                name, email, password, role: 'admin', createdAt: new Date().toISOString() 
+            };
+            admins.push(newAdmin);
+            saveAdmins(admins);
+            setAdminSession(newAdmin);
+            msgDiv.textContent = '✓ Admin account created! redirecting...';
+            msgDiv.className = 'message success';
+            setTimeout(() => { window.location.href = 'manager.html'; }, 800);
+        }
+
+        function goToForgotPassword() {
+            window.location.href = 'forgot-password.html';
+        }
+
+        function initTabs() {
+            const tabs = document.querySelectorAll('.tab-btn');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const target = tab.getAttribute('data-tab');
+                    const loginForm = document.getElementById('loginForm');
+                    const registerForm = document.getElementById('registerForm');
+                    const adminRegisterForm = document.getElementById('adminRegisterForm');
+                    
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    
+                    loginForm.classList.remove('active');
+                    registerForm.classList.remove('active');
+                    adminRegisterForm.classList.remove('active');
+                    
+                    if (target === 'login') {
+                        loginForm.classList.add('active');
+                    } else {
+                        if (selectedRole === 'admin') {
+                            adminRegisterForm.classList.add('active');
+                        } else {
+                            registerForm.classList.add('active');
+                        }
+                    }
+                    clearMessages();
+                });
+            });
+        }
+
+        // Theme handling
+        function initTheme() {
+            const saved = localStorage.getItem('tixl_theme');
+            if (saved === 'light') document.body.classList.add('light-mode');
+            else document.body.classList.remove('light-mode');
+        }
+        
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
+            const isLight = document.body.classList.contains('light-mode');
+            localStorage.setItem('tixl_theme', isLight ? 'light' : 'dark');
+        }
+        
+        document.getElementById('themeToggle')?.addEventListener('click', toggleTheme);
+        
+        // Particles
+        function createParticles() {
+            const container = document.getElementById('particles');
+            if (!container) return;
+            for (let i = 0; i < 35; i++) {
+                const p = document.createElement('div');
+                p.classList.add('particle');
+                p.style.left = Math.random() * 100 + '%';
+                const size = Math.random() * 6 + 2;
+                p.style.width = size + 'px';
+                p.style.height = size + 'px';
+                p.style.animationDelay = Math.random() * 20 + 's';
+                p.style.animationDuration = (Math.random() * 15 + 10) + 's';
+                p.style.background = `hsl(${Math.random() * 60 + 260}, 70%, 60%)`;
+                container.appendChild(p);
+            }
+        }
+
+        // Bootstrap
+        initializeDefaultData();
+        createParticles();
+        initTabs();
+        initTheme();
+        
+        console.log('=== Tixl Login System ===');
+        console.log('Admin Registration Key: TixlAdmin2025!');
+        console.log('To register as admin: 1) Select "Administrator" role, 2) Click "register" tab, 3) Fill form with key: TixlAdmin2025!');
+    </script>
+</body>
+</html>

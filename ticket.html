@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Tixl · Tickets Essential - Ticket Store</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-gradient-start: #1a1a2e;
+            --bg-gradient-mid: #16213e;
+            --bg-gradient-end: #0f0f1a;
+            --bg-card: rgba(26,26,46,0.9);
+            --bg-card-solid: #1a1a2e;
+            --text-primary: #F0F0F5;
+            --text-secondary: #A0A0B5;
+            --border-color: #2A2A3A;
+            --accent-purple: #9B59B6;
+            --accent-purple-light: #BE7BDE;
+            --accent-purple-dark: #7D3C98;
+            --accent-lavender: #D4B8D9;
+            --input-bg: rgba(0,0,0,0.4);
+            --shadow-color: rgba(0,0,0,0.3);
+            --voucher-gold: #F5A623;
+            --transition-default: all 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+        }
+        body.light-mode {
+            --bg-gradient-start: #f5f0e8;
+            --bg-gradient-mid: #faf5ed;
+            --bg-gradient-end: #f0ebe3;
+            --bg-card: rgba(255,255,255,0.95);
+            --bg-card-solid: #ffffff;
+            --text-primary: #2C2A28;
+            --text-secondary: #6B6762;
+            --border-color: #E8E4DD;
+            --accent-purple: #8B5E3C;
+            --accent-purple-light: #B88A5A;
+            --accent-purple-dark: #6B4528;
+            --accent-lavender: #D4B896;
+            --input-bg: rgba(0,0,0,0.03);
+            --shadow-color: rgba(0,0,0,0.08);
+        }
+        body {
+            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-mid) 50%, var(--bg-gradient-end) 100%);
+            font-family: 'Inter', sans-serif;
+            color: var(--text-primary);
+            padding: clamp(1rem, 4vw, 2rem);
+            min-height: 100vh;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+        .container { max-width: 1400px; margin: 0 auto; width: 100%; }
+        
+        .top-bar { 
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            border-radius: clamp(1rem, 5vw, 1.5rem);
+            padding: 0.8rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 8px 32px var(--shadow-color);
+        }
+        .brand h1 { 
+            font-family: 'Playfair Display', serif; 
+            font-size: clamp(1.4rem, 6vw, 1.8rem); 
+            font-weight: 700; 
+            letter-spacing: 0px;
+            background: linear-gradient(135deg, var(--text-primary), var(--accent-lavender));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .header-actions { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+        .theme-toggle, .profile-btn, .user-greeting, .logout-btn, .login-redirect-btn {
+            background: var(--bg-card-solid);
+            border: 1px solid var(--border-color);
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: clamp(0.7rem, 3vw, 0.8rem);
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.2s;
+            color: var(--text-primary);
+            white-space: nowrap;
+        }
+        .theme-toggle:hover, .profile-btn:hover, .user-greeting:hover, .logout-btn:hover, .login-redirect-btn:hover {
+            background: var(--accent-purple);
+            color: white;
+            border-color: var(--accent-purple);
+        }
+        
+        .voucher-banner {
+            background: linear-gradient(135deg, var(--accent-purple-dark), var(--accent-purple));
+            border-radius: 1.2rem;
+            padding: 0.8rem 1.2rem;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            border: 1px solid var(--accent-lavender);
+            box-shadow: 0 4px 15px rgba(155,89,182,0.3);
+        }
+        .voucher-banner span:first-child { font-size: clamp(0.7rem, 3vw, 0.8rem); font-weight: 600; letter-spacing: 0.5px; }
+        .voucher-code { background: rgba(255,255,255,0.2); padding: 0.3rem 1rem; border-radius: 2rem; font-family: monospace; font-size: clamp(0.8rem, 4vw, 0.9rem); font-weight: 700; letter-spacing: 1px; }
+        .voucher-banner small { font-size: 0.65rem; opacity: 0.9; }
+        
+        .wallet-header h2 { 
+            font-family: 'Playfair Display', serif; 
+            font-size: clamp(1.6rem, 7vw, 2.2rem); 
+            font-weight: 600; 
+            color: var(--text-primary);
+            letter-spacing: 0px;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid var(--accent-purple);
+            padding-left: 1rem;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+        }
+        .wallet-badge { background: var(--accent-purple); padding: 0.2rem 0.8rem; border-radius: 2rem; font-size: 0.7rem; font-weight: 600; color: white; }
+        .ticket-grid { display: flex; flex-direction: column; gap: 1.5rem; width: 100%; margin-bottom: 3rem; }
+        
+        .ticket-stub {
+            background: var(--bg-card);
+            backdrop-filter: blur(4px);
+            border-radius: 1.5rem;
+            transition: var(--transition-default);
+            width: 100%;
+            box-shadow: 0 15px 35px var(--shadow-color);
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+        }
+        .ticket-stub:hover { transform: translateY(-4px); box-shadow: 0 25px 45px var(--shadow-color); border-color: var(--accent-purple); }
+        .ticket-stub::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 200%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent-purple), var(--accent-lavender), transparent);
+            animation: purpleShine 8s infinite ease-in-out;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        @keyframes purpleShine {
+            0% { transform: translateX(-100%); }
+            50% { transform: translateX(50%); }
+            100% { transform: translateX(200%); }
+        }
+        .ticket-inner { display: flex; flex-wrap: wrap; position: relative; z-index: 2; }
+        .ticket-left {
+            flex: 1;
+            min-width: 140px;
+            background: rgba(0,0,0,0.1);
+            border-right: 1px dashed var(--border-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem 1rem;
+            text-align: center;
+        }
+        .qr-container { background: white; padding: 0.6rem; border-radius: 1rem; cursor: pointer; transition: all 0.3s ease; }
+        .qr-container:hover { transform: scale(1.02); box-shadow: 0 0 0 2px var(--accent-purple); }
+        .ticket-type {
+            font-size: 0.7rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            display: inline-block;
+            padding: 0.25rem 0.8rem;
+            border-radius: 2rem;
+            font-weight: 700;
+            margin-top: 0.6rem;
+        }
+        .ticket-type.single { background: rgba(128,128,128,0.2); color: var(--text-secondary); }
+        .ticket-type.vip { background: var(--accent-purple); color: white; }
+        .ticket-type.backstage { background: var(--accent-purple-dark); color: white; }
+        .ticket-right { flex: 3; padding: 1.2rem 1.5rem; min-width: 220px; }
+        .event-name { font-family: 'Playfair Display', serif; font-size: clamp(1.2rem, 5vw, 1.6rem); font-weight: 700; color: var(--text-primary); margin-bottom: 0.8rem; }
+        .info-row { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+        .info-label { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 1px; color: var(--accent-purple); font-weight: 700; }
+        .info-value { font-size: 0.85rem; font-weight: 500; color: var(--text-primary); }
+        .class-badge { display: inline-block; padding: 0.25rem 1rem; border-radius: 2rem; font-size: 0.7rem; font-weight: 700; }
+        .class-badge.single { background: rgba(128,128,128,0.2); color: var(--text-secondary); }
+        .class-badge.vip { background: var(--accent-purple); color: white; }
+        .class-badge.backstage { background: var(--accent-purple-dark); color: white; }
+        .ticket-footer { margin-top: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.8rem; padding-top: 1rem; border-top: 1px solid var(--border-color); }
+        .ticket-id { font-family: monospace; font-size: 0.7rem; color: var(--text-secondary); background: var(--input-bg); padding: 0.2rem 0.8rem; border-radius: 1rem; }
+        .ticket-price { font-family: monospace; font-size: 0.7rem; color: var(--accent-purple-light); background: var(--input-bg); padding: 0.2rem 0.8rem; border-radius: 1rem; }
+        .action-buttons { display: flex; gap: 0.6rem; }
+        .cancel-btn, .download-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            padding: 0.3rem 0.8rem;
+            border-radius: 2rem;
+            font-size: 0.65rem;
+            cursor: pointer;
+            transition: 0.2s;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+        .cancel-btn:hover { background: var(--accent-purple); border-color: var(--accent-purple); color: white; }
+        .download-btn:hover { background: var(--accent-lavender); border-color: var(--accent-lavender); color: #1a1a2e; }
+        
+        .events-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; margin: 2rem 0; }
+        .event-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(4px);
+            border-radius: 1.5rem;
+            overflow: hidden;
+            transition: var(--transition-default);
+            box-shadow: 0 10px 25px var(--shadow-color);
+            border: 1px solid var(--border-color);
+        }
+        .event-card:hover { transform: translateY(-4px); border-color: var(--accent-purple); }
+        .card-header { padding: 1.2rem 1.2rem 0.8rem; border-bottom: 1px solid var(--border-color); }
+        .event-name-card { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 700; color: var(--text-primary); }
+        .event-date { font-size: 0.7rem; color: var(--text-secondary); margin-top: 0.3rem; }
+        .event-details { padding: 1rem 1.2rem; }
+        .progress-bar { height: 4px; background: var(--border-color); border-radius: 10px; overflow: hidden; margin: 0.5rem 0; }
+        .progress-fill { background: var(--accent-purple); height: 100%; border-radius: 10px; transition: width 0.4s; }
+        .spots-left { margin-top: 0.5rem; font-size: 0.65rem; font-weight: 600; color: var(--accent-purple); }
+        .purchase-form { padding: 0.8rem 1.2rem 1.2rem; border-top: 1px solid var(--border-color); }
+        .purchase-form input, .purchase-form select {
+            width: 100%;
+            padding: 0.7rem 0.9rem;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 0.8rem;
+            color: var(--text-primary);
+            margin-bottom: 0.8rem;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.8rem;
+        }
+        .purchase-form input:focus, .purchase-form select:focus { outline: none; border-color: var(--accent-purple); }
+        .tier-options { display: flex; gap: 0.5rem; margin: 0.8rem 0; flex-wrap: wrap; }
+        .tier-btn {
+            flex: 1;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            padding: 0.5rem 0.3rem;
+            border-radius: 2rem;
+            cursor: pointer;
+            transition: 0.2s;
+            color: var(--text-secondary);
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-align: center;
+        }
+        .tier-price { display: block; font-size: 0.6rem; margin-top: 0.2rem; font-weight: 400; }
+        .tier-btn.active { background: var(--accent-purple); color: white; border-color: var(--accent-purple); }
+        .voucher-input-group { display: flex; gap: 0.5rem; margin: 0.8rem 0; }
+        .voucher-input-group input { flex: 1; margin-bottom: 0; font-size: 0.7rem; }
+        .apply-voucher {
+            background: transparent;
+            border: 1px solid var(--accent-purple);
+            padding: 0 1rem;
+            border-radius: 2rem;
+            color: var(--accent-purple);
+            font-size: 0.65rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            white-space: nowrap;
+        }
+        .apply-voucher:hover { background: var(--accent-purple); color: white; }
+        .price-display {
+            text-align: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin: 0.6rem 0;
+            padding: 0.4rem 0.6rem;
+            background: var(--input-bg);
+            border-radius: 1rem;
+            color: var(--accent-purple-light);
+        }
+        .discount-badge { background: var(--voucher-gold); color: #2C2A28; padding: 0.1rem 0.5rem; border-radius: 1rem; font-size: 0.6rem; font-weight: 700; margin-left: 0.5rem; }
+        .buy-btn {
+            width: 100%;
+            background: var(--accent-purple);
+            color: white;
+            border: none;
+            border-radius: 2rem;
+            padding: 0.7rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.85rem;
+        }
+        .buy-btn:hover { transform: scale(0.98); filter: brightness(1.05); }
+        .soldout-badge { text-align: center; padding: 0.6rem; background: var(--input-bg); border-radius: 2rem; color: var(--text-secondary); font-size: 0.7rem; }
+        
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); z-index: 1000; display: flex; align-items: center; justify-content: center; visibility: hidden; opacity: 0; transition: 0.2s; }
+        .modal.open { visibility: visible; opacity: 1; }
+        .modal-card {
+            background: var(--bg-card-solid);
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            max-width: 450px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px var(--shadow-color);
+            border: 1px solid var(--accent-purple);
+            margin: 1rem;
+        }
+        .modal-card h3 { font-family: 'Playfair Display', serif; color: var(--text-primary); margin-bottom: 1rem; font-size: 1.4rem; font-weight: 700; }
+        .modal-card input, .modal-card select, .modal-card textarea {
+            width: 100%;
+            padding: 0.7rem;
+            margin: 0.5rem 0;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 0.8rem;
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+        }
+        .modal-buttons { display: flex; gap: 0.8rem; justify-content: center; margin-top: 1.2rem; }
+        .modal-btn { padding: 0.5rem 1.2rem; border-radius: 2rem; cursor: pointer; border: none; font-weight: 600; font-size: 0.85rem; transition: 0.2s; }
+        .modal-btn.confirm { background: var(--accent-purple); color: white; }
+        .modal-btn.cancel { background: var(--input-bg); color: var(--text-secondary); }
+        .close-modal-btn { background: var(--accent-purple); color: white; border: none; padding: 0.5rem 1.2rem; border-radius: 2rem; cursor: pointer; margin-top: 1rem; font-weight: 600; }
+        
+        .toast { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); background: var(--bg-card-solid); padding: 0.6rem 1.2rem; border-radius: 2rem; z-index: 300; opacity: 0; transition: 0.2s; color: var(--text-primary); font-size: 0.75rem; white-space: nowrap; font-weight: 600; border: 1px solid var(--accent-purple); pointer-events: none; }
+        .toast.show { opacity: 1; }
+        @media (max-width: 550px) { .toast { white-space: normal; max-width: 90%; text-align: center; } }
+        footer { text-align: center; font-size: 0.65rem; margin-top: 3rem; padding-top: 1.2rem; border-top: 1px solid var(--border-color); color: var(--text-secondary); }
+        .empty-wallet { background: var(--bg-card); border-radius: 1.5rem; padding: 3rem 1rem; text-align: center; border: 1px solid var(--border-color); color: var(--text-secondary); width: 100%; }
+        .intro h2 { font-size: clamp(1.6rem, 7vw, 2.2rem); margin-bottom: 0.3rem; }
+        .intro p { font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="top-bar">
+        <div class="brand"><h1>Tixl · Tickets Essential<span>.</span></h1></div>
+        <div class="header-actions">
+            <button class="theme-toggle" id="themeToggle">🌓 Light/Dark</button>
+            <div class="user-greeting" id="userGreeting" style="display: none;"></div>
+            <button class="profile-btn" id="profileBtn" style="display: none;">👤 Profile</button>
+            <button class="logout-btn" id="logoutBtn" style="display: none;" onclick="logoutUser()">🚪 Logout</button>
+            <button class="login-redirect-btn" id="loginRedirectBtn" style="display: none;" onclick="window.location.href='index.html'">🔐 Sign In</button>
+        </div>
+    </div>
+    
+    <div class="voucher-banner">
+        <span>🎟️ LIMITED OFFER</span>
+        <div><span class="voucher-code">TIXL2025</span> <small>−15% on VIP & Backstage</small></div>
+        <small>use code at checkout</small>
+    </div>
+    
+    <div class="ticket-wallet-section">
+        <div class="wallet-header"><h2>Ticket Wallet<span class="wallet-badge" id="ticketCountBadge">0 tickets</span></h2></div>
+        <div id="walletTicketList" class="ticket-grid"></div>
+    </div>
+    
+    <div class="intro"><h2 style="font-family:'Playfair Display',serif; font-weight: 600; color: var(--text-primary);">Upcoming Events</h2><p style="color: var(--text-secondary);">Choose Your Access — standard, vip, or backstage</p></div>
+    <div id="eventsContainer" class="events-grid"></div>
+    <footer>© Tixl · Tickets Essential · tap QR to view | high-res downloads</footer>
+</div>
+
+<div id="qrExpandOverlay" class="modal">
+    <div class="modal-card">
+        <h3 id="expandEventName">Event Ticket</h3>
+        <div id="largeQrContainer"></div>
+        <div id="expandTicketId" style="font-family: monospace; margin-bottom: 1rem; font-size: 0.7rem;"></div>
+        <button class="close-modal-btn" onclick="closeQrExpand()">close</button>
+    </div>
+</div>
+
+<div id="toastMsg" class="toast"></div>
+<div id="confirmModal" class="modal"><div class="modal-card"><h3 id="confirmMessage">Purchase ticket?</h3><div class="modal-buttons"><button class="modal-btn confirm" id="confirmYes">confirm</button><button class="modal-btn cancel" id="confirmNo">cancel</button></div></div></div>
+<div id="profileModal" class="modal"><div class="modal-card"><h3>👤 Edit Profile</h3><input type="text" id="profileName" placeholder="Full Name"><input type="email" id="profileEmail" placeholder="Email Address"><select id="profileGrade"><option value="">Select Grade/Position</option><option value="Grade 11 - Student">Grade 11 - Student</option><option value="Grade 12 - Student">Grade 12 - Student</option><option value="College - Student">College - Student</option><option value="Teacher - Faculty">Teacher - Faculty</option><option value="Staff - Employee">Staff - Employee</option></select><input type="text" id="profileDepartment" placeholder="Section / Department (optional)"><textarea id="profileBio" placeholder="Bio (optional)"></textarea><div class="modal-buttons"><button class="modal-btn confirm" id="saveProfileBtn">Save Changes</button><button class="modal-btn cancel" id="closeProfileBtn">Cancel</button></div></div></div>
+
+<script>
+    const STORAGE_USER_SESSION = 'tixl_user_session';
+    const STORAGE_EVENTS = 'tixl_events';
+    const STORAGE_ATTENDEES = 'tixl_attendees';
+    let currentUser = null;
+    let pendingPurchase = null;
+    let refreshTimeout = null;
+    
+    const VALID_VOUCHERS = { 'TIXL2025': 0.15 };
+    
+    function applyVoucher(code, tier) {
+        if (VALID_VOUCHERS[code] && tier !== 'single') {
+            return { discount: VALID_VOUCHERS[code], valid: true };
+        }
+        return { discount: 0, valid: false };
+    }
+    
+    function formatTimeToAMPM(timeStr) {
+        if (!timeStr) return 'TBA';
+        if (timeStr.includes('AM') || timeStr.includes('PM')) return timeStr;
+        let hours, minutes;
+        if (timeStr.includes(':')) {
+            const parts = timeStr.split(':');
+            hours = parseInt(parts[0]);
+            minutes = parts[1];
+        } else {
+            hours = parseInt(timeStr);
+            minutes = '00';
+        }
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        let displayHours = hours % 12;
+        displayHours = displayHours === 0 ? 12 : displayHours;
+        return `${displayHours}:${minutes} ${ampm}`;
+    }
+
+    function initTheme() {
+        const savedTheme = localStorage.getItem('tixl_theme');
+        if (savedTheme === 'light') document.body.classList.add('light-mode');
+        else document.body.classList.remove('light-mode');
+    }
+    function toggleTheme() {
+        document.body.classList.toggle('light-mode');
+        localStorage.setItem('tixl_theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
+        showMessage(document.body.classList.contains('light-mode') ? 'Light mode activated' : 'Dark mode activated');
+    }
+    document.getElementById('themeToggle')?.addEventListener('click', toggleTheme);
+    initTheme();
+
+    function loadEvents() { 
+        let stored = localStorage.getItem(STORAGE_EVENTS);
+        if(stored) return JSON.parse(stored);
+        return defaultEvents;
+    }
+    function loadAttendees() { return JSON.parse(localStorage.getItem(STORAGE_ATTENDEES) || '[]'); }
+    function saveAttendees(a) { localStorage.setItem(STORAGE_ATTENDEES, JSON.stringify(a)); }
+    function showMessage(msg, err=false) { let t=document.getElementById('toastMsg'); t.textContent=msg; t.style.background=err?'#7D3C98':'var(--bg-card-solid)'; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000); }
+    function generateTicketId(name, tier) { let p=name.trim().split(/\s+/); let c1=(p[0]?.[0]||'X').toUpperCase(); let c2=(p[1]?.[0]||p[0]?.[1]||'X').toUpperCase(); let rand=Math.random().toString(36).substring(2,6).toUpperCase(); let tierCode = tier==='backstage'?'BKS':(tier==='vip'?'VIP':'STD'); return `${tierCode}-${c1}${c2}${rand}`; }
+    function generateQR(elId, text, size=80) { let c=document.getElementById(elId); if(c) { c.innerHTML=''; new QRCode(c,{text:text,width:size,height:size,colorDark:"#1a1a2e",colorLight:"#FFFFFF"}); } }
+
+    function expandQROnly(ticketId, eventName) { 
+        let container=document.getElementById('largeQrContainer'); 
+        if(container){ container.innerHTML=''; new QRCode(container,{text:ticketId,width:200,height:200,colorDark:"#1a1a2e",colorLight:"#FFFFFF"}); document.getElementById('expandEventName').innerText=eventName; document.getElementById('expandTicketId').innerText = ticketId; document.getElementById('qrExpandOverlay').classList.add('open'); } 
+    }
+    window.closeQrExpand = function() { document.getElementById('qrExpandOverlay').classList.remove('open'); };
+    
+    function cancelTicket(ticketId) { 
+        if(!currentUser) return; let att=loadAttendees(); let ticket=att.find(a=>a.ticketId===ticketId && a.userId===currentUser.id); if(!ticket) return; if(ticket.checkedIn) { showMessage("Already used, cannot cancel",true); return; } att=att.filter(a=>a.id!==ticket.id); saveAttendees(att); showMessage(`✖ Cancelled`); renderShop(); renderWalletTickets(); updateUI(); 
+    }
+    
+    async function downloadTicket(ticketElement, ticketCode, eventName) { 
+        try {
+            showMessage("Generating high-res ticket...");
+            const originalTransform = ticketElement.style.transform;
+            ticketElement.style.transform = 'none';
+            await new Promise(resolve => setTimeout(resolve, 50));
+            const canvas = await html2canvas(ticketElement, { scale: 3, backgroundColor: getComputedStyle(document.body).getPropertyValue('--bg-card-solid').trim() || '#1a1a2e', logging: false });
+            ticketElement.style.transform = originalTransform;
+            const link = document.createElement('a'); const safeName = eventName.replace(/[^a-z0-9]/gi, '_').substring(0, 30);
+            link.download = `ticket_${safeName}_${ticketCode}.png`; link.href = canvas.toDataURL('image/png'); link.click();
+            showMessage(`✓ HD ticket saved`);
+        } catch(e) { console.error(e); showMessage("Download failed", true); } 
+    }
+
+    function renderWalletTickets() {
+        let container=document.getElementById('walletTicketList'); if(!container) return;
+        if(!currentUser) { 
+            container.innerHTML=`<div class="empty-wallet">🔐 Please sign in to see your tickets<br><button class="btn" onclick="window.location.href='index.html'" style="margin-top:1rem; background:var(--accent-purple); color:white; border:none; padding:0.6rem 1.5rem; border-radius:2rem; cursor:pointer;">Go to Login →</button></div>`; 
+            return; 
+        }
+        let attendees=loadAttendees(), events=loadEvents(), myTickets=attendees.filter(a=>a.userId===currentUser.id);
+        if(myTickets.length===0) { container.innerHTML=`<div class="empty-wallet">no tickets yet — purchase an event above</div>`; return; }
+        container.innerHTML='';
+        myTickets.forEach((ticket,idx)=>{
+            let event=events.find(e=>e.id===ticket.eventId); if(!event) return;
+            let qrId=`qr_${ticket.id}_${idx}`;
+            let tierClass = ticket.tier || 'single';
+            let badgeClass = tierClass === 'backstage' ? 'backstage' : (tierClass === 'vip' ? 'vip' : 'single');
+            let badgeText = tierClass === 'backstage' ? 'backstage access' : (tierClass === 'vip' ? 'vip experience' : 'standard admission');
+            let priceDisplay = ticket.price ? `₱${ticket.price.toLocaleString()}` : '';
+            let statusBadge = ticket.checkedIn ? '<span class="badge" style="background:#c24141; color:white; padding:0.2rem 0.7rem; border-radius:1.2rem; font-size:0.6rem;">✓ Used</span>' : '<span class="badge" style="background:var(--accent-purple); color:white; padding:0.2rem 0.7rem; border-radius:1.2rem; font-size:0.6rem;">○ Valid</span>';
+            let formattedTime = formatTimeToAMPM(event.time);
+            let ticketDiv=document.createElement('div'); ticketDiv.className='ticket-stub'; 
+            ticketDiv.innerHTML=`
+                <div class="ticket-inner">
+                    <div class="ticket-left">
+                        <div class="qr-wrapper"><div class="qr-container"><div id="${qrId}" style="width:80px;height:80px;"></div></div></div>
+                        <div class="ticket-type ${badgeClass}">${tierClass.toUpperCase()}</div>
+                    </div>
+                    <div class="ticket-right">
+                        <div class="event-name">${escapeHtml(event.name)}</div>
+                        <div class="info-row"><div class="info-group"><div class="info-label">DATE</div><div class="info-value">${escapeHtml(event.date)}</div></div><div class="info-group"><div class="info-label">TIME</div><div class="info-value">${escapeHtml(formattedTime)}</div></div></div>
+                        <div class="class-badge ${badgeClass}">${badgeText}</div>
+                        <div class="ticket-footer"><div class="ticket-id">${ticket.ticketId}</div><div class="ticket-price">${priceDisplay}</div><div style="margin-left: auto;">${statusBadge}</div><div class="action-buttons"><button class="download-btn">download</button><button class="cancel-btn">cancel</button></div></div>
+                    </div>
+                </div>
+            `;
+            container.appendChild(ticketDiv); generateQR(qrId, ticket.ticketId, 80);
+            ticketDiv.querySelector('.qr-container').addEventListener('click',(e)=>{ e.stopPropagation(); expandQROnly(ticket.ticketId, event.name); });
+            ticketDiv.querySelector('.download-btn').addEventListener('click',async (e)=>{ e.stopPropagation(); await downloadTicket(ticketDiv, ticket.ticketId, event.name); });
+            ticketDiv.querySelector('.cancel-btn').addEventListener('click',(e)=>{ e.stopPropagation(); cancelTicket(ticket.ticketId); });
+        });
+    }
+
+    function openConfirmModal(eventId, tier, name, grade, finalPrice, voucherCode) { 
+        pendingPurchase = { eventId, tier, name, grade, finalPrice, voucherCode }; 
+        document.getElementById('confirmMessage').innerHTML = `purchase ${tier.toUpperCase()} ticket?<br><span style="font-size:0.7rem;">${escapeHtml(name)} · ${escapeHtml(grade)}</span><br><span style="font-size:0.8rem; color:var(--accent-purple-light);">₱${finalPrice.toLocaleString()} PHP</span>`; 
+        document.getElementById('confirmModal').classList.add('open'); 
+    }
+    function closeConfirmModal() { document.getElementById('confirmModal').classList.remove('open'); pendingPurchase = null; }
+    function executePurchase() { 
+        if(!pendingPurchase) return; let { eventId, tier, name, grade, finalPrice, voucherCode } = pendingPurchase; let events=loadEvents(); let event=events.find(e=>e.id===eventId); if(!event) return; let attendees=loadAttendees(); let taken=attendees.filter(a=>a.eventId===eventId).length; if(taken>=event.capacity) { showMessage(`"${event.name}" sold out`,true); closeConfirmModal(); renderShop(); return; } 
+        let newTicketId=generateTicketId(name, tier); let newAttendee={ id:'att_'+Date.now()+'_'+Math.random().toString(36).substr(2,6), name, grade, eventId, ticketId:newTicketId, checkedIn:false, purchasedAt:new Date().toISOString(), userId:currentUser.id, tier:tier, price:finalPrice, voucherUsed:voucherCode || null }; 
+        attendees.push(newAttendee); saveAttendees(attendees); showMessage(`✓ ${tier.toUpperCase()} ticket secured for ₱${finalPrice.toLocaleString()}`); closeConfirmModal(); renderShop(); renderWalletTickets(); updateUI(); 
+    }
+
+    function renderShop() {
+        let container=document.getElementById('eventsContainer'); if(!container) return;
+        let events=loadEvents(), attendees=loadAttendees();
+        if(events.length === 0) {
+            container.innerHTML = `<div class="empty-wallet" style="padding:3rem; text-align:center;">📅 No events available yet. Please check back later.</div>`;
+            return;
+        }
+        container.innerHTML=events.map(ev=>{ 
+            let taken=attendees.filter(a=>a.eventId===ev.id).length, avail=Math.max(0,ev.capacity-taken), percent=(taken/ev.capacity)*100, soldOut=avail===0; 
+            let prefillName=currentUser?escapeHtml(currentUser.name):'', prefillGrade=currentUser?.grade ? `${currentUser.grade}` : '';
+            let prices = ev.prices || { single: 0, vip: 0, backstage: 0 };
+            let formattedTime = formatTimeToAMPM(ev.time);
+            return `<div class="event-card"><div class="card-header"><div class="event-name-card">${escapeHtml(ev.name)}</div><div class="event-date">${ev.date || 'TBA'} · ${formattedTime}</div></div><div class="event-details"><div style="display:flex; justify-content:space-between;"><span>seats available</span><span>${taken}/${ev.capacity}</span></div><div class="progress-bar"><div class="progress-fill" style="width:${percent}%;"></div></div><div class="spots-left">${soldOut?'sold out':`${avail} remaining`}</div></div><div class="purchase-form"><input type="text" id="name_${ev.id}" placeholder="full name" value="${prefillName}"><select id="grade_${ev.id}"><option value="">Select Grade/Position</option><option value="Grade 11 - Student" ${prefillGrade === 'Grade 11 - Student' ? 'selected' : ''}>Grade 11 - Student</option><option value="Grade 12 - Student" ${prefillGrade === 'Grade 12 - Student' ? 'selected' : ''}>Grade 12 - Student</option><option value="College - Student" ${prefillGrade === 'College - Student' ? 'selected' : ''}>College - Student</option><option value="Teacher - Faculty" ${prefillGrade === 'Teacher - Faculty' ? 'selected' : ''}>Teacher - Faculty</option><option value="Staff - Employee" ${prefillGrade === 'Staff - Employee' ? 'selected' : ''}>Staff - Employee</option></select><div class="tier-options"><button class="tier-btn" data-tier="single" data-event="${ev.id}">STANDARD<span class="tier-price">₱${prices.single}</span></button><button class="tier-btn" data-tier="vip" data-event="${ev.id}">VIP<span class="tier-price">₱${prices.vip}</span></button><button class="tier-btn" data-tier="backstage" data-event="${ev.id}">BACKSTAGE<span class="tier-price">₱${prices.backstage}</span></button></div><div class="voucher-input-group"><input type="text" id="voucher_${ev.id}" placeholder="voucher code (optional)"><button class="apply-voucher" data-event="${ev.id}">apply</button></div><div id="price_${ev.id}" class="price-display"></div>${soldOut?'<div class="soldout-badge">sold out</div>':`<button class="buy-btn" data-id="${ev.id}">purchase →</button>`}</div></div>`; 
+        }).join('');
+        
+        events.forEach(ev=>{ 
+            let btns=document.querySelectorAll(`.tier-btn[data-event="${ev.id}"]`); 
+            let currentVoucher = '';
+            let prices = ev.prices || { single: 0, vip: 0, backstage: 0 };
+            
+            if(btns.length) btns[0].classList.add('active');
+            btns.forEach(btn=>{ btn.addEventListener('click',()=>{ btns.forEach(b=>b.classList.remove('active')); btn.classList.add('active'); updatePriceDisplay(ev.id, btn.getAttribute('data-tier'), currentVoucher, prices); }); });
+            
+            const applyBtn = document.querySelector(`.apply-voucher[data-event="${ev.id}"]`);
+            const voucherInput = document.getElementById(`voucher_${ev.id}`);
+            
+            function updatePriceDisplay(eventId, tier, voucherCode, priceObj) {
+                let basePrice = priceObj[tier] || 0;
+                let finalPrice = basePrice;
+                let discountText = '';
+                if(voucherCode && VALID_VOUCHERS[voucherCode] && tier !== 'single') {
+                    finalPrice = basePrice * (1 - VALID_VOUCHERS[voucherCode]);
+                    discountText = `<span class="discount-badge">-${VALID_VOUCHERS[voucherCode]*10}% OFF</span>`;
+                }
+                document.getElementById(`price_${eventId}`).innerHTML = `total: ₱${finalPrice.toLocaleString()} PHP ${discountText}`;
+                return finalPrice;
+            }
+            
+            if(applyBtn && voucherInput) {
+                applyBtn.addEventListener('click',()=>{
+                    let code = voucherInput.value.trim().toUpperCase();
+                    let activeBtn = document.querySelector(`.tier-btn[data-event="${ev.id}"].active`);
+                    let tier = activeBtn?.getAttribute('data-tier') || 'single';
+                    let result = applyVoucher(code, tier);
+                    if(result.valid) {
+                        currentVoucher = code;
+                        showMessage(`✓ ${code} applied! ${result.discount*100}% discount`, false);
+                        updatePriceDisplay(ev.id, tier, code, prices);
+                    } else {
+                        if(code && tier === 'single') showMessage(`Vouchers not valid for Standard tickets`, true);
+                        else if(code) showMessage(`Invalid voucher code`, true);
+                        currentVoucher = '';
+                        updatePriceDisplay(ev.id, tier, '', prices);
+                    }
+                });
+            }
+            
+            let defaultTier = 'single';
+            updatePriceDisplay(ev.id, defaultTier, '', prices);
+            
+            let purchaseBtn=document.querySelector(`.buy-btn[data-id="${ev.id}"]`); 
+            if(purchaseBtn){ 
+                purchaseBtn.addEventListener('click',()=>{ 
+                    if(!currentUser){ 
+                        showMessage('Please sign in to purchase tickets',true); 
+                        return; 
+                    } 
+                    let nameInput=document.getElementById(`name_${ev.id}`); 
+                    let gradeSelect=document.getElementById(`grade_${ev.id}`); 
+                    let name=nameInput?.value.trim(); 
+                    let grade=gradeSelect?.value; 
+                    if(!name||!grade){ showMessage('Enter name & select grade/position',true); return; } 
+                    let activeTierBtn=document.querySelector(`.tier-btn[data-event="${ev.id}"].active`); 
+                    let tier=activeTierBtn?.getAttribute('data-tier')||'single';
+                    let voucherField = document.getElementById(`voucher_${ev.id}`);
+                    let voucherCode = voucherField?.value.trim().toUpperCase() || '';
+                    let finalPrice = prices[tier] || 0;
+                    if(voucherCode && VALID_VOUCHERS[voucherCode] && tier !== 'single') {
+                        finalPrice = finalPrice * (1 - VALID_VOUCHERS[voucherCode]);
+                    }
+                    if(finalPrice <= 0) { showMessage('Invalid ticket price', true); return; }
+                    openConfirmModal(ev.id, tier, name, grade, finalPrice, voucherCode); 
+                }); 
+            } 
+        });
+    }
+    
+    function openProfileModal() {
+        if(!currentUser) return;
+        document.getElementById('profileName').value = currentUser.name || '';
+        document.getElementById('profileEmail').value = currentUser.email || '';
+        let gradeSelect = document.getElementById('profileGrade');
+        if(gradeSelect && currentUser.grade) {
+            for(let i=0; i<gradeSelect.options.length; i++) {
+                if(gradeSelect.options[i].value === currentUser.grade) {
+                    gradeSelect.selectedIndex = i;
+                    break;
+                }
+            }
+        }
+        document.getElementById('profileDepartment').value = currentUser.department || '';
+        document.getElementById('profileBio').value = currentUser.bio || '';
+        document.getElementById('profileModal').classList.add('open');
+    }
+    function closeProfileModal() { document.getElementById('profileModal').classList.remove('open'); }
+    function saveProfile() {
+        if(!currentUser) return;
+        let newName = document.getElementById('profileName').value.trim();
+        let newEmail = document.getElementById('profileEmail').value.trim();
+        let newGrade = document.getElementById('profileGrade').value;
+        let newDepartment = document.getElementById('profileDepartment').value.trim();
+        let newBio = document.getElementById('profileBio').value.trim();
+        if(newName) currentUser.name = newName;
+        if(newEmail) currentUser.email = newEmail;
+        if(newGrade) currentUser.grade = newGrade;
+        if(newDepartment) currentUser.department = newDepartment;
+        currentUser.bio = newBio;
+        localStorage.setItem(STORAGE_USER_SESSION, JSON.stringify(currentUser));
+        showMessage('Profile updated successfully!');
+        closeProfileModal();
+        updateUI();
+        renderShop();
+    }
+    
+    function logoutUser() {
+        localStorage.removeItem(STORAGE_USER_SESSION);
+        currentUser = null;
+        showMessage('Signed out successfully! Redirecting...');
+        setTimeout(() => { window.location.href = 'index.html'; }, 1000);
+    }
+    
+    function checkAuth(){ 
+        let session=localStorage.getItem(STORAGE_USER_SESSION); 
+        if(session){ 
+            try{ 
+                let data=JSON.parse(session); 
+                if(data.expires>Date.now() && data.role==='user') {
+                    currentUser=data; 
+                } else { 
+                    localStorage.removeItem(STORAGE_USER_SESSION); 
+                }
+            } catch(e){} 
+        } 
+        updateUI(); 
+        renderShop(); 
+        renderWalletTickets(); 
+    }
+    function updateUI(){ 
+        let greet=document.getElementById('userGreeting'); 
+        let badge=document.getElementById('ticketCountBadge'); 
+        let profileBtn=document.getElementById('profileBtn');
+        let logoutBtn=document.getElementById('logoutBtn');
+        let loginRedirectBtn=document.getElementById('loginRedirectBtn');
+        
+        if(currentUser){ 
+            let count=loadAttendees().filter(a=>a.userId===currentUser.id).length; 
+            greet.style.display='block'; 
+            greet.innerHTML=`👋 ${currentUser.name.split(' ')[0]} · ${count} ticket${count!==1?'s':''}`; 
+            profileBtn.style.display='block';
+            logoutBtn.style.display='block';
+            loginRedirectBtn.style.display='none';
+            if(badge) badge.innerText=`${count} ${count===1?'pass':'passes'}`; 
+        } else { 
+            greet.style.display='none'; 
+            profileBtn.style.display='none';
+            logoutBtn.style.display='none';
+            loginRedirectBtn.style.display='block';
+            if(badge) badge.innerText='0 tickets'; 
+        } 
+    }
+    function escapeHtml(s){ if(!s) return ''; return s.replace(/[&<>]/g,function(m){ if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
+    
+    document.getElementById('confirmYes')?.addEventListener('click',executePurchase);
+    document.getElementById('confirmNo')?.addEventListener('click',closeConfirmModal);
+    document.getElementById('profileBtn')?.addEventListener('click',openProfileModal);
+    document.getElementById('saveProfileBtn')?.addEventListener('click',saveProfile);
+    document.getElementById('closeProfileBtn')?.addEventListener('click',closeProfileModal);
+    document.getElementById('userGreeting')?.addEventListener('click',()=>{ document.getElementById('walletTicketList')?.scrollIntoView({behavior:'smooth'}); renderWalletTickets(); });
+    document.getElementById('confirmModal')?.addEventListener('click',(e)=>{ if(e.target===document.getElementById('confirmModal')) closeConfirmModal(); });
+    document.getElementById('profileModal')?.addEventListener('click',(e)=>{ if(e.target===document.getElementById('profileModal')) closeProfileModal(); });
+    document.getElementById('qrExpandOverlay')?.addEventListener('click',(e)=>{ if(e.target===document.getElementById('qrExpandOverlay')) closeQrExpand(); });
+    
+    checkAuth();
+</script>
+</body>
+</html>
